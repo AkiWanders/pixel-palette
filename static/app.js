@@ -165,9 +165,30 @@
     zoomPct.textContent = `${Math.round(state.zoom * 100)}%`;
   }
 
-  function setZoom(z) {
-    state.zoom = Math.min(4, Math.max(0.2, z));
+  function setZoom(z, clientX, clientY) {
+    const stage = document.getElementById("preview-stage");
+    if (clientX === undefined || clientY === undefined) {
+      const rect = stage.getBoundingClientRect();
+      clientX = rect.left + stage.clientWidth / 2;
+      clientY = rect.top + stage.clientHeight / 2;
+    }
+    const zoom = Math.min(4, Math.max(0.2, z));
+    if (zoom === state.zoom) return;
+
+    const sRect = stage.getBoundingClientRect();
+    const cRect = canvas.getBoundingClientRect();
+    const viewX = clientX - sRect.left;
+    const viewY = clientY - sRect.top;
+    const ux = Math.min(1, Math.max(0, (viewX - (cRect.left - sRect.left)) / cRect.width));
+    const uy = Math.min(1, Math.max(0, (viewY - (cRect.top - sRect.top)) / cRect.height));
+
+    state.zoom = zoom;
     applySize();
+
+    const nLeft = canvas.offsetLeft;
+    const nTop = canvas.offsetTop;
+    stage.scrollLeft = nLeft + ux * canvas.clientWidth - viewX;
+    stage.scrollTop = nTop + uy * canvas.clientHeight - viewY;
   }
 
   zoomInBtn.addEventListener("click", () => setZoom(state.zoom * 1.25));
@@ -179,7 +200,7 @@
     (e) => {
       if (!state.img) return;
       e.preventDefault();
-      setZoom(e.deltaY < 0 ? state.zoom * 1.25 : state.zoom / 1.25);
+      setZoom(e.deltaY < 0 ? state.zoom * 1.25 : state.zoom / 1.25, e.clientX, e.clientY);
     },
     { passive: false }
   );
