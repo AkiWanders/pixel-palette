@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Palette</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Pixel Palette</div>
+    <div class="topbar-actions">
+      <button type="button" class="icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+        <span class="theme-icon" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="ghost-btn" id="close-btn" title="Stop the app and close this page">Close app</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- ============ input + controls ============ -->
+    <section class="panel">
+      <input type="file" id="file-input" accept="image/*" hidden>
+
+      <div class="drop-zone" id="drop-zone">
+        <svg class="drop-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="1.5"
+                d="M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM9 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm11 5-5-5-6 6"/>
+        </svg>
+        <p class="drop-text">Drag &amp; drop an image here, or
+          <button type="button" class="link-btn" id="browse-btn">browse</button>
+        </p>
+        <p class="hint">PNG &middot; JPG &middot; GIF &middot; WebP &middot; max 20 MB</p>
+      </div>
+
+      <div class="preview" id="preview-wrap" hidden>
+        <div class="preview-toolbar">
+          <span class="preview-name" id="preview-name"></span>
+          <span class="zoom-controls" id="zoom-controls" hidden>
+            <button type="button" class="zoom-btn" id="zoom-out" title="Zoom out" aria-label="Zoom out">&minus;</button>
+            <button type="button" class="zoom-pct" id="zoom-pct" title="100% = fits the window">100%</button>
+            <button type="button" class="zoom-btn" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+            <button type="button" class="zoom-btn" id="zoom-fit" title="Reset to fit">Fit</button>
+          </span>
+        </div>
+        <div class="preview-stage" id="preview-stage">
+          <canvas id="preview-canvas"></canvas>
+          <div class="pick-readout" id="pick-readout" hidden>
+            <span class="pick-swatch" id="pick-swatch"></span>
+            <span class="pick-hex" id="pick-hex"></span>
+          </div>
+          <button type="button" class="reset-btn" id="reset-btn" title="Remove image">&times;</button>
+        </div>
+        <p class="pick-hint" id="pick-hint" hidden></p>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <span class="label">Method</span>
+          <div class="segmented" role="group" aria-label="Extraction method">
+            <button type="button" class="seg-btn active" data-method="kmeans">K-means</button>
+            <button type="button" class="seg-btn" data-method="median">Median cut</button>
+            <button type="button" class="seg-btn" data-method="manual">Manual</button>
+          </div>
+        </div>
+
+        <div class="control-group" id="colors-group">
+          <span class="label">Colors: <span id="color-count">16</span></span>
+          <input type="range" id="num-colors" min="2" max="48" value="16" step="1">
+        </div>
+
+        <button type="button" class="extract-btn" id="extract-btn">Extract palette</button>
+        <p class="manual-hint" id="manual-hint" hidden>
+          Click the image to add a color. Select a swatch, then click and drag on the image to adjust it.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ palette output ============ -->
+    <section class="panel output" id="results" hidden>
+      <div class="output-header">
+        <div class="output-title">
+          <h2 id="results-title">Palette</h2>
+          <p class="output-subtle" id="output-subtle"></p>
+        </div>
+        <div class="output-actions">
+          <button type="button" class="add-btn" id="add-btn" title="Add a color slot">+ Add</button>
+          <div class="export-btns">
+            <button type="button" class="export-btn" data-fmt="png" title="Swatch image">PNG</button>
+            <button type="button" class="export-btn" data-fmt="gpl" title="GIMP palette">GPL</button>
+            <button type="button" class="export-btn" data-fmt="ase" title="Adobe swatch">ASE</button>
+          </div>
+        </div>
+      </div>
+      <div class="strip-list" id="color-list"></div>
+      <p class="copied-note" id="copied-note" hidden>Copied to clipboard</p>
+    </section>
+
+    <div class="error" id="error" hidden></div>
+  </main>
+
+  <template id="color-strip-template">
+    <div class="swatch" tabindex="0">
+      <span class="hex-label"></span>
+      <span class="swatch-tools">
+        <input type="color" class="native-color" title="Color picker" aria-label="Recolor">
+        <button type="button" class="remove-btn" title="Remove color">&times;</button>
+      </span>
+    </div>
+  </template>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
